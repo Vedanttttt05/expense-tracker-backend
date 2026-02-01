@@ -1,0 +1,28 @@
+{
+  "name": "expense-tracker-backend",
+  "version": "1.0.0",
+  "description": "Backend API for tracking expenses and budgets with JWT authentication, MongoDB aggregation, and clean REST architecture.",
+  "keywords": [
+    "javascript",
+    "backend"
+  ],
+  "homepage": "https://github.com/Vedanttttt05/expense-tracker-backend#readme",
+  "bugs": {
+    "url": "https://github.com/Vedanttttt05/expense-tracker-backend/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Vedanttttt05/expense-tracker-backend.git"
+  },
+  "license": "ISC",
+  "author": "Vedant Patil",
+  "type": "module",
+  "main": "index.js",
+  "scripts": {
+    "dev": "nodemon src/index.js"
+  },
+
+  "devDependencies": {
+    "nodemon": "^3.1.11"
+  }
+}
