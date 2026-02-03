@@ -8,7 +8,7 @@ const userSchema = new Schema({
 
     username: { type: String, required: true, unique: true , lowercase: true, trim: true , index: true},
 
-    email: { type: String, required: true , lowercase: true, trim: true },
+    email: { type: String, required: true ,unique: true, lowercase: true, trim: true },
 
     isEmailVerified : { type : Boolean , default : false},
 
@@ -18,13 +18,11 @@ const userSchema = new Schema({
 
     avatarPublicId: { type: String },
 
-    watchHistory: [{ type: Schema.Types.ObjectId, ref: "Video" }],   
-
     password: { type: String, select: false, required: function(){
         return this.provider === "local";
     } },
 
-    refreshToken: { type: String  , password : false },
+    refreshToken: { type: String  , select : false },
 
     lastLoginAt : { type : Date} ,
 
@@ -59,9 +57,6 @@ userSchema.pre("save", async function (next) {
     this.password = await bcrypt.hash(this.password, 10);
     next();
 });
-
-userSchema.index({ email: 1, provider: 1 }, { unique: true });
-userSchema.index({ username: 1 }, { unique: true });
 
 
 userSchema.methods.comparePassword = async function (candidatePassword) {
