@@ -2,7 +2,6 @@ import mongoose, { Schema } from "mongoose";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 
-//avatar handling remained to be added
 const userSchema = new Schema({
 
     role : { type: String, enum: ["user" , "admin"] , default : "user"},
