@@ -95,3 +95,16 @@ const loginUser = asyncHandler (async (req, res) => {
 
 });
 
+const logoutUser = asyncHandler (async (req, res) => {
+
+    const userId = req.user.userId;
+    const user = await User.findById(userId).select("+refreshToken");
+    if (user){
+        user.refreshToken = null;
+        await user.save({ validateBeforeSave: false });
+
+    }
+
+
+    res.status(200).json(new apiResponse(200 , "User logged out successfully" , null));
+});
