@@ -39,13 +39,14 @@ const registerUser = asyncHandler (async (req, res) => {
 
 const loginUser = asyncHandler (async (req, res) => {
 
-    const { identifer , password } = req.body;
+    const { identifier , password } = req.body;
 
-    if ([identifer , password].some((field) => field?.trim() === "")){
+    if ([identifier , password].some((field) => field?.trim() === "")){
         throw new apiError(400 ,"All fields are required" );
     }
     const user = await User.findOne({
-        $or: [{ email: identifer.toLowerCase() }, { username: identifer.toLowerCase() }]
+        $or: [{ email: identifier
+.toLowerCase() }, { username: identifier.toLowerCase() }]
     }).select("+password +refreshToken");
     if(!user){
         throw new apiError(401 , "Invalid credentials");
