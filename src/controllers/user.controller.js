@@ -86,10 +86,20 @@ const loginUser = asyncHandler (async (req, res) => {
 
     const userData = await User.findById(user._id).select("-password -refreshToken");
 
-    res.status(200).json(new apiResponse(200 , "User logged in successfully" , {
-        user : userData,
-        accessToken,
-        refreshToken
+    res
+    .cookie("accessToken", accessToken, {
+    httpOnly: true,
+    secure: true,
+    sameSite: "strict",
+    })
+    .cookie("refreshToken", refreshToken, {
+    httpOnly: true,
+    secure: true,
+    sameSite: "strict",
+    })
+    .status(200)
+    .json(new apiResponse(200, "User logged in successfully", {
+    user: userData,
     }));
 
 
