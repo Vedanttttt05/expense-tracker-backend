@@ -62,4 +62,42 @@ const getTransactions = asyncHandler (async (req, res) => {
 });
 
 
+const updateTransaction = asyncHandler (async (req, res) => {
+    const { id } = req.params;
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+        throw new apiError(400, "Invalid transaction ID");
+    }
+    const transaction = await Transaction.findOne({ _id: id, user: req.user._id, isDeleted: false });
+    if (!transaction) {
+        throw new apiError(404, "Transaction not found");
+    }
+    const { amount, type, category, date, note } = req.body;
+    if (amount !== undefined) {
+        if (amount < 0) {
+            throw new apiError(400, "Amount must be a positive number");
+        }
+        if (typeof amount !== "number") {
+            throw new apiError(400, "Amount must be a number");
+        }
+        transaction.amount = amount;
+    }
+    if (type !== undefined) {
+        if (!["income", "expense"].includes(type)) {
+            throw new apiError(400, "Type must be either 'income' or 'expense'");
+        }
+        transaction.type = type;
+    }
+    if (category !== undefined) {
+        transaction.category = category;
+    }
+    if (date !== undefined) {
+        transaction.date = date;
+    }
+    if (note !== undefined) {
+        transaction.note = note;
+    }
+    await transaction.save();
+    res.status(200).json(new apiResponse(200, "Transaction updated successfully", transaction));
+});
+
 
