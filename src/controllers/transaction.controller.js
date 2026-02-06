@@ -101,3 +101,17 @@ const updateTransaction = asyncHandler (async (req, res) => {
 });
 
 
+const deleteTransaction = asyncHandler (async (req, res) => {
+    const { id } = req.params;
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+        throw new apiError(400, "Invalid transaction ID");
+    }   
+    const transaction = await Transaction.findOne({ _id: id, user: req.user._id, isDeleted: false });
+    if (!transaction) {
+        throw new apiError(404, "Transaction not found");
+    }
+    transaction.isDeleted = true;
+    await transaction.save();
+    res.status(200).json(new apiResponse(200, "Transaction deleted successfully"));
+    
+});
