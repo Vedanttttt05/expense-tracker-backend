@@ -8,7 +8,7 @@ import mongoose from "mongoose";
 
 const createTransaction = asyncHandler (async (req, res) => {
     const { amount, type, category, date, note } = req.body;
-    if ([amount, type, category, date].some((field) => field === undefined || field === "")) {
+    if ([amount, type, category].some((field) => field === undefined || field === "")) {
         throw new apiError(400, "Amount, type, category, and date are required");
     }
     if (amount < 0) {
