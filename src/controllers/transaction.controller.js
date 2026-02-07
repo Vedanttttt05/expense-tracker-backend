@@ -115,3 +115,6 @@ const deleteTransaction = asyncHandler (async (req, res) => {
     res.status(200).json(new apiResponse(200, "Transaction deleted successfully"));
     
 });
+
+
+export { createTransaction, getTransactions, updateTransaction, deleteTransaction };
