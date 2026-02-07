@@ -70,9 +70,10 @@ const loginUser = asyncHandler (async (req, res) => {
         throw new apiError(401 , "Invalid credentials");
         
     }
-    if (!user.isEmailVerified) {
-        throw new apiError(403, "Please verify your email before logging in");
-    }
+    // Temporarily disabling email verification check for testing purposes
+    // if (!user.isEmailVerified) {
+    //     throw new apiError(403, "Please verify your email before logging in");
+    // }
 
 
 

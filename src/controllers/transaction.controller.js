@@ -117,4 +117,4 @@ const deleteTransaction = asyncHandler (async (req, res) => {
 });
 
 
-export { createTransaction, getTransactions, updateTransaction, deleteTransaction };
+export { createTransaction, getTransactions, updateTransaction, deleteTransaction }
