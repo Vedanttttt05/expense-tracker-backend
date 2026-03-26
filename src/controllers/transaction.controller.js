@@ -3,23 +3,41 @@ import apiError from '../utils/apiError.js';
 import { Transaction } from '../models/transaction.model.js';
 import  apiResponse  from '../utils/apiResponse.js';
 import mongoose from "mongoose";
+import { Category } from '../models/category.model.js';
 
 
 
 const createTransaction = asyncHandler (async (req, res) => {
     const { amount, type, category, date, note } = req.body;
     if ([amount, type, category].some((field) => field === undefined || field === "")) {
-        throw new apiError(400, "Amount, type, category, and date are required");
-    }
-    if (amount < 0) {
-        throw new apiError(400, "Amount must be a positive number");
+        throw new apiError(400, "Amount, type, and category are required");
     }
     if (typeof amount !== "number") {
     throw new apiError(400, "Amount must be a number");
     }
+
+    if (amount < 0) {
+        throw new apiError(400, "Amount must be a positive number");
+    }
     if (!["income", "expense"].includes(type)) {
         throw new apiError(400, "Type must be either 'income' or 'expense'");
     }
+    if (!mongoose.Types.ObjectId.isValid(category)) {
+    throw new apiError(400, "Invalid category ID");
+  }
+
+    const categoryExists = await Category.findOne({
+    _id: category,
+    user: req.user._id,
+  });
+
+  if (!categoryExists) {
+    throw new apiError(404, "Category not found");
+  }
+
+  if (categoryExists.type !== type) {
+    throw new apiError(400, "Transaction type must match category type");
+  }
     const transaction = await Transaction.create({
         amount,
         type,
