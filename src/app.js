@@ -4,6 +4,7 @@ import cookieParser from "cookie-parser";
 
 
 
+
 const app = express(); 
 
 app.use(cors({
@@ -23,7 +24,9 @@ app.use(cookieParser());
 import userRoutes from "./routes/user.routes.js";
 import transactionRoutes from "./routes/transaction.routes.js";
 import categoryRoutes from "./routes/category.routes.js";
+import budgetRoutes from "./routes/budget.routes.js";
 
+app.use("/api/budgets", budgetRoutes);
 app.use("/api/v1/" , userRoutes);
 app.use("/api/v1/transactions" , transactionRoutes);
 app.use("/api/v1/categories" , categoryRoutes);
