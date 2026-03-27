@@ -45,8 +45,7 @@ const loginUser = asyncHandler (async (req, res) => {
         throw new apiError(400 ,"All fields are required" );
     }
     const user = await User.findOne({
-        $or: [{ email: identifier
-.toLowerCase() }, { username: identifier.toLowerCase() }]
+        $or: [{ email: identifier.toLowerCase() }, { username: identifier.toLowerCase() }]
     }).select("+password +refreshToken");
     if(!user){
         throw new apiError(401 , "Invalid credentials");
@@ -106,18 +105,29 @@ const loginUser = asyncHandler (async (req, res) => {
 
 });
 
-const logoutUser = asyncHandler (async (req, res) => {
+const logoutUser = asyncHandler(async (req, res) => {
 
     const userId = req.user.userId;
+
     const user = await User.findById(userId).select("+refreshToken");
-    if (user){
+
+    if (user) {
         user.refreshToken = null;
         await user.save({ validateBeforeSave: false });
-
     }
 
+    const options = {
+        httpOnly: true,
+        secure: true,
+        sameSite: "strict"
+    };
 
-    res.status(200).json(new apiResponse(200 , "User logged out successfully" , null));
+    res
+    .clearCookie("accessToken", options)
+    .clearCookie("refreshToken", options)
+    .status(200)
+    .json(new apiResponse(200 , "User logged out successfully" , null));
+
 });
 
 export { registerUser , loginUser , logoutUser }
