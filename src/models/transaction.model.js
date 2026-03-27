@@ -3,8 +3,13 @@ import mongoose, { Schema } from "mongoose";
 const transactionSchema = new Schema({
 
     amount : { type : Number , required : true , min :0 },
+    
     type : { type : String , enum : ["income" , "expense"] , required : true },
-    category : { type : String , required : true },
+    category : {
+                type: mongoose.Schema.Types.ObjectId,
+                ref: "Category",
+                 required: true,
+                },
     date : { type : Date , required : true  , default : Date.now },
     note : { type : String  , required : false },
     user : { type : mongoose.Schema.Types.ObjectId , ref : "User" , required : true },
