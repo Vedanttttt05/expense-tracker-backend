@@ -15,6 +15,15 @@ const createCategory = asyncHandler(async (req, res) => {
     if (!["income", "expense"].includes(type.toLowerCase())) {
         throw new apiError(400, "Invalid category type");
     }
+    const existingCategory = await Category.findOne({
+    name,
+    user: req.user._id,
+    isDeleted: false
+});
+
+    if (existingCategory) {
+    throw new apiError(409, "Category already exists");
+}
 
     const category = await Category.create({
         name,
@@ -30,10 +39,13 @@ const createCategory = asyncHandler(async (req, res) => {
 
 const getCategories = asyncHandler(async (req, res) => {
 
-    const categories = await Category.find({
-        user: req.user._id,
-        isDeleted: false
-    });
+const categories = await Category.find({
+    $or: [
+        { user: req.user._id },
+        { isDefault: true }
+    ],
+    isDeleted: false
+});
 
     res.status(200).json(
         new apiResponse(200, "Categories fetched successfully", categories)
@@ -50,15 +62,26 @@ const updateCategory = asyncHandler(async (req, res) => {
         throw new apiError(400, "Invalid category ID");
     }
 
+    if (type && !["income", "expense"].includes(type.toLowerCase())) {
+    throw new apiError(400, "Invalid category type");
+    }
+
     const category = await Category.findOne({
-        _id: id,
-        user: req.user._id,
-        isDeleted: false
+    _id: id,
+    $or: [
+        { user: req.user._id },
+        { isDefault: true }
+    ],
+    isDeleted: false
     });
 
     if (!category) {
         throw new apiError(404, "Category not found");
     }
+
+    if (category.isDefault) {
+    throw new apiError(403, "Default categories cannot be modified");
+}
 
     if (name) category.name = name;
     if (type) category.type = type;
@@ -79,15 +102,21 @@ const deleteCategory = asyncHandler(async (req, res) => {
         throw new apiError(400, "Invalid category ID");
     }
 
-    const category = await Category.findOne({
-        _id: id,
-        user: req.user._id,
-        isDeleted: false
-    });
+const category = await Category.findOne({
+    _id: id,
+    $or: [
+        { user: req.user._id },
+        { isDefault: true }
+    ],
+    isDeleted: false
+});
 
     if (!category) {
         throw new apiError(404, "Category not found");
     }
+    if (category.isDefault) {
+    throw new apiError(403, "Default categories cannot be deleted");
+}
 
     category.isDeleted = true;
     await category.save();

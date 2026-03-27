@@ -16,9 +16,14 @@ const categorySchema = new Schema({
     user : {
         type : mongoose.Schema.Types.ObjectId,
         ref : "User",
-        required : true,
+        required : false,
 
     },
+    isDefault: {
+        type: Boolean,
+        default: false
+    }
+    ,
     isDeleted : {
     type : Boolean,
     default : false
@@ -29,7 +34,7 @@ const categorySchema = new Schema({
     timestamps: true
 })
 
-categorySchema.index({ user: 1, name: 1 }, { unique: true });
+categorySchema.index({ user: 1, name: 1 , type : 1 }, { unique: true });
 
 const Category = mongoose.model("Category" , categorySchema);
 export { Category };
