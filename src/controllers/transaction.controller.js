@@ -12,13 +12,12 @@ const createTransaction = asyncHandler (async (req, res) => {
     if ([amount, type, category].some((field) => field === undefined || field === "")) {
         throw new apiError(400, "Amount, type, and category are required");
     }
-    if (typeof amount !== "number") {
-    throw new apiError(400, "Amount must be a number");
+    const parsedAmount = Number(amount);
+
+    if (isNaN(parsedAmount) || parsedAmount <= 0) {
+    throw new apiError(400, "Amount must be a positive number");
     }
 
-    if (amount < 0) {
-        throw new apiError(400, "Amount must be a positive number");
-    }
     if (!["income", "expense"].includes(type)) {
         throw new apiError(400, "Type must be either 'income' or 'expense'");
     }
@@ -26,11 +25,14 @@ const createTransaction = asyncHandler (async (req, res) => {
     throw new apiError(400, "Invalid category ID");
   }
 
-    const categoryExists = await Category.findOne({
-    _id: category,
-    user: req.user._id,
-  });
-
+const categoryExists = await Category.findOne({
+  _id: category,
+  $or: [
+    { user: req.user._id },
+    { isDefault: true }
+  ],
+  isDeleted: false
+})
   if (!categoryExists) {
     throw new apiError(404, "Category not found");
   }
@@ -39,7 +41,7 @@ const createTransaction = asyncHandler (async (req, res) => {
     throw new apiError(400, "Transaction type must match category type");
   }
     const transaction = await Transaction.create({
-        amount,
+        amount: parsedAmount,
         type,
         category,
         date,
@@ -72,6 +74,7 @@ const getTransactions = asyncHandler (async (req, res) => {
         }
     }
     const transactions = await Transaction.find(filters)
+        .populate("category", "name type")
         .sort({ date: -1 })
         .skip((page - 1) * limit)
         .limit(parseInt(limit));
@@ -91,12 +94,14 @@ const updateTransaction = asyncHandler (async (req, res) => {
     }
     const { amount, type, category, date, note } = req.body;
     if (amount !== undefined) {
+        
+        if (typeof amount !== "number") {
+        throw new apiError(400, "Amount must be a number");
+        }
         if (amount < 0) {
             throw new apiError(400, "Amount must be a positive number");
         }
-        if (typeof amount !== "number") {
-            throw new apiError(400, "Amount must be a number");
-        }
+
         transaction.amount = amount;
     }
     if (type !== undefined) {
@@ -106,8 +111,33 @@ const updateTransaction = asyncHandler (async (req, res) => {
         transaction.type = type;
     }
     if (category !== undefined) {
-        transaction.category = category;
-    }
+
+  if (!mongoose.Types.ObjectId.isValid(category)) {
+    throw new apiError(400, "Invalid category ID");
+  }
+
+  const categoryExists = await Category.findOne({
+    _id: category,
+    $or: [
+      { user: req.user._id },
+      { isDefault: true }
+    ],
+    isDeleted: false
+  });
+
+  if (!categoryExists) {
+    throw new apiError(404, "Category not found");
+  }
+  const finalType = type !== undefined ? type : transaction.type;
+    const finalCategory = category !== undefined ? categoryExists : await Category.findById(transaction.category);
+
+if (finalCategory.type !== finalType) {
+  throw new apiError(400, "Transaction type must match category type");
+}
+
+  transaction.category = category;
+}
+    
     if (date !== undefined) {
         transaction.date = date;
     }
