@@ -96,3 +96,47 @@ const getIncomeVsExpense = asyncHandler(async (req, res) => {
         new apiResponse(200, "Income vs Expense", result)
     )
 })
+
+const getTotalBalance = asyncHandler(async (req, res) => {
+
+    const result = await Transaction.aggregate([
+        {
+            $match: {
+                user: req.user._id,
+                isDeleted: false
+            }
+        },
+        {
+            $group: {
+                _id: null,
+                totalIncome: {
+                    $sum: {
+                        $cond: [
+                            { $eq: ["$type", "income"] },
+                            "$amount",
+                            0
+                        ]
+                    }
+                },
+                totalExpense: {
+                    $sum: {
+                        $cond: [
+                            { $eq: ["$type", "expense"] },
+                            "$amount",
+                            0
+                        ]
+                    }
+                }
+            }
+        }
+    ])
+
+    const balance = result[0]?.totalIncome - result[0]?.totalExpense
+
+    res.status(200).json(
+        new apiResponse(200, "Total balance", {
+            ...result[0],
+            balance
+        })
+    )
+})
