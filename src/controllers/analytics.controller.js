@@ -74,3 +74,25 @@ const getCategoryWiseExpense = asyncHandler(async (req, res) => {
         new apiResponse(200, "Category wise expense", result)
     )
 })
+
+const getIncomeVsExpense = asyncHandler(async (req, res) => {
+
+    const result = await Transaction.aggregate([
+        {
+            $match: {
+                user: req.user._id,
+                isDeleted: false
+            }
+        },
+        {
+            $group: {
+                _id: "$type",
+                total: { $sum: "$amount" }
+            }
+        }
+    ])
+
+    res.status(200).json(
+        new apiResponse(200, "Income vs Expense", result)
+    )
+})
